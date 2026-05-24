@@ -8,4 +8,5 @@ public interface MaintenanceService {
     List<MaintenanceTicket> getTicketsByEmployee(String email);
     List<MaintenanceTicket> getAllTickets();
     MaintenanceTicket updateTicketStatus(Long id, String status, String managerNotes);
+    void deleteTicket(Long id);
 }

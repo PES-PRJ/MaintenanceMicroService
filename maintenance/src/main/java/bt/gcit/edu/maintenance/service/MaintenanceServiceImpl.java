@@ -21,7 +21,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         if (ticket.getStatus() == null || ticket.getStatus().trim().isEmpty()) {
             ticket.setStatus("REPORTED");
         }
-        
+
         if (ticket.getCreatedAt() == null) {
             ticket.setCreatedAt(LocalDateTime.now());
         }
@@ -43,10 +43,18 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     public MaintenanceTicket updateTicketStatus(Long id, String status, String managerNotes) {
         MaintenanceTicket ticket = maintenanceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Maintenance ticket not found with id: " + id));
-        
+
         ticket.setStatus(status);
         ticket.setManagerNotes(managerNotes);
-        
+
         return maintenanceRepository.save(ticket);
+    }
+
+    @Override
+    public void deleteTicket(Long id) {
+        if (!maintenanceRepository.existsById(id)) {
+            throw new RuntimeException("Maintenance ticket not found with id: " + id);
+        }
+        maintenanceRepository.deleteById(id);
     }
 }

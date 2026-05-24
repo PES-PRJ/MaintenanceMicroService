@@ -20,14 +20,15 @@ public class MaintenanceController {
 
     @PostMapping("/tickets")
     public ResponseEntity<MaintenanceTicket> createTicket(
-            @RequestBody MaintenanceTicket ticket, 
+            @RequestBody MaintenanceTicket ticket,
             Principal principal) {
-        
-        // Extract email from JWT and bind it to the entity to satisfy the non-null constraint
+
+        // Extract email from JWT and bind it to the entity to satisfy the non-null
+        // constraint
         if (principal != null) {
             ticket.setReportedByEmail(principal.getName());
         }
-        
+
         return ResponseEntity.ok(maintenanceService.createTicket(ticket));
     }
 
@@ -51,6 +52,16 @@ public class MaintenanceController {
             String notes = updateRequest.get("managerNotes");
             MaintenanceTicket updated = maintenanceService.updateTicketStatus(id, status, notes);
             return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/tickets/{id}")
+    public ResponseEntity<?> deleteTicket(@PathVariable Long id) {
+        try {
+            maintenanceService.deleteTicket(id);
+            return ResponseEntity.ok(Map.of("message", "Ticket deleted successfully"));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }

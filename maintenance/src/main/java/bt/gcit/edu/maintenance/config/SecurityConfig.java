@@ -20,20 +20,27 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // 1. Employees can file tickets and look up their personal history
-                .requestMatchers(HttpMethod.POST, "/api/maintenance/tickets").hasAnyAuthority("EMPLOYEE", "ASSETMANAGER")
-                .requestMatchers(HttpMethod.GET, "/api/maintenance/my-tickets").hasAnyAuthority("EMPLOYEE", "ASSETMANAGER")
-                
-                // 2. Only Asset Managers can look at all open tickets and modify their progress status
-                .requestMatchers(HttpMethod.GET, "/api/maintenance/tickets").hasAuthority("ASSETMANAGER")
-                .requestMatchers(HttpMethod.PUT, "/api/maintenance/tickets/{id}/status").hasAuthority("ASSETMANAGER")
-                
-                .anyRequest().authenticated())
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        // 1. Employees can file tickets and look up their personal history
+                        .requestMatchers(HttpMethod.POST, "/api/maintenance/tickets")
+                        .hasAnyAuthority("EMPLOYEE", "ASSETMANAGER")
+                        .requestMatchers(HttpMethod.GET, "/api/maintenance/my-tickets")
+                        .hasAnyAuthority("EMPLOYEE", "ASSETMANAGER")
+
+                        // 2. Only Asset Managers can look at all open tickets and modify their progress
+                        // status
+                        .requestMatchers(HttpMethod.GET, "/api/maintenance/tickets").hasAuthority("ASSETMANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/api/maintenance/tickets/{id}/status")
+                        .hasAuthority("ASSETMANAGER")
+                        // Place this inside authorizeHttpRequests alongside your other matchers
+                        .requestMatchers(HttpMethod.DELETE, "/api/maintenance/tickets/{id}")
+                        .hasAuthority("ASSETMANAGER")
+                        
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
